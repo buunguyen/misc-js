@@ -1,7 +1,7 @@
 JavaScript Samples
 ==========
 
-This is a collection of JavaScript samples I code when learning things.
+This is a collection of JavaScript samples I code when learning Node, Express, Backbone etc.
 I will keep adding more samples as I continue playing with these.
 
 * _: small, happy library used by samples which don't (want to) depend on any framework
