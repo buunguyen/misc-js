@@ -126,9 +126,14 @@
         }
     }
 
-    mn.rand = function (max) {
-        return max ? Math.round(Math.random() * max)
-                   : Math.random()
+    mn.rand = function (min, max) {
+        if (!min && !max)
+            return Math.random()
+        if (!max) {
+            max = min
+            min = 0
+        }
+        return min + Math.round(Math.random() * (max - min - 1))
     }
 
     mn.extend = function (target) {

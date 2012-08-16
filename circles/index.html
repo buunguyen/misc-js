@@ -1,23 +1,35 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<title>Circles on Canvas</title>
-		<meta charset="utf-8" />
-        <script src="../_/mn.js"></script>
-        <script src="js/app.js"></script>
-	</head>
-	<body>
-        <div>
-            <canvas class="circles"></canvas>
-            <canvas class="circles"></canvas>
-        </div>
-        <div>
-            <canvas class="circles"></canvas>
-            <canvas class="circles"></canvas>
-        </div>
-		<div>
-            <button id="btnAddSpeed">Add Speed</button>
-		    <button id="btnAddBall" value="Add Balls">Add Ball</button>
-        </div>
-	</body>
+<head>
+    <title>Circles on Canvas</title>
+    <meta charset="utf-8"/>
+    <script src="../_/mn.js"></script>
+    <script src="js/app.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            background-color: #000;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+
+        canvas {
+            -webkit-animation-duration: 1s;
+            -webkit-animation-timing-function: ease-in-out;
+        }
+
+        @-webkit-keyframes blur {
+            35% {
+                -webkit-filter:blur(5px);
+            }
+            100% {
+                -webkit-filter:blur(0);
+            }
+        }
+    </style>
+</head>
+<body>
+</body>
 </html>

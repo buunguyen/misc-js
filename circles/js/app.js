@@ -1,136 +1,151 @@
 (function (window) {
-    var Point = function (x, y) {
-        this.x = x
-        this.y = y
-    }
-
     var Circle = function (pos, dir, color, radius) {
         this.pos = pos
         this.dir = dir
         this.color = color
         this.radius = radius
+        this.lastPos = []
     }
 
-    Circle.prototype.move = function (speed, w, h) {
-        this.pos.x += this.dir.x * speed
-        if (this.pos.x < 0) {
-            this.pos.x = 0
-            this.dir.x = -this.dir.x
-        } else if ((this.pos.x + this.radius * 2) > w) {
-            this.pos.x = w - this.radius * 2
-            this.dir.x = -this.dir.x
+    Circle.prototype = {
+        render: function(w, h, ctx) {
+            this.move(w, h)
+            ctx.globalAlpha = 1
+            this.draw(ctx, this.lastPos[0], this.radius)
+
+            ctx.globalAlpha = 0.4
+            for (var i = 1; i < this.lastPos.length; i++) {
+                ctx.globalAlpha -= .05
+                this.draw(ctx, this.lastPos[i], this.radius - i * .05)
+            }
+        },
+        move: function (w, h) {
+            if (this.lastPos.length == 10)
+                this.lastPos.pop()
+
+            this.pos.x += this.dir.x
+            if (this.pos.x - this.radius < 0) {
+                this.pos.x = this.radius
+                this.dir.x = -this.dir.x
+            } else if (this.pos.x + this.radius > w) {
+                this.pos.x = w - this.radius
+                this.dir.x = -this.dir.x
+            }
+
+            this.pos.y += this.dir.y
+            if (this.pos.y - this.radius < 0) {
+                this.pos.y = this.radius
+                this.dir.y = -this.dir.y
+            } else if (this.pos.y + this.radius > h) {
+                this.pos.y = h - this.radius
+                this.dir.y = -this.dir.y
+            }
+
+            this.lastPos.unshift({x: this.pos.x, y: this.pos.y})
+        },
+        draw: function (ctx, pos, radius) {
+            ctx.save();
+            ctx.translate(pos.x, pos.y)
+            ctx.beginPath()
+            ctx.arc(0, 0, radius, 0, Math.PI * 2, false)
+            ctx.closePath()
+            ctx.fillStyle = this.color
+            ctx.fill()
+            ctx.restore()
         }
-
-        this.pos.y += this.dir.y * speed
-        if (this.pos.y < 0) {
-            this.pos.y = 0
-            this.dir.y = -this.dir.y
-        } else if ((this.pos.y + this.radius * 2) > h) {
-            this.pos.y = h - this.radius * 2
-            this.dir.y = -this.dir.y
-        }
     }
 
-    Circle.prototype.draw = function (context) {
-        context.beginPath()
-        context.arc(this.pos.x + this.radius,
-            this.pos.y + this.radius,
-            this.radius,
-            0,
-            utils.degreesToRadians(360), true)
-        context.fillStyle = this.color
-        context.fill()
-    }
-
-    var Frame = function (canvas, numberOfCircles) {
+    var Scene = function (canvas, numberOfCircles) {
         this.canvas = canvas
-        this.speed = 1
         this.numberOfCircles = numberOfCircles || 5
         this.circles = []
+        this.canvas.addEventListener('webkitAnimationEnd', function () {
+            this.style.webkitAnimationName = ''
+        })
+        var startPos
+        this.canvas.addEventListener("mousedown", function (e) {
+            startPos = { x: e.x, y: e.y }
+        })
+        this.canvas.addEventListener("mouseup", mn.thunk(this, function(e) {
+            this.addCircle({ x: e.x, y: e.y },
+                           { x: (startPos.x - e.x) / 20, y: (startPos.y - e.y) / 20 })
+        }))
     }
 
-    Frame.prototype.start = function () {
-        for (var i = 0; i < this.numberOfCircles; i++) {
-            this.addCircle()
+    Scene.prototype = {
+        start: function () {
+            for (var i = 0; i < this.numberOfCircles; i++) {
+                this.addCircle()
+            }
+            var self = this
+            setInterval(function () {
+                self.render()
+            }, 16)
+            return this
+        },
+        addCircle: function (pos, dir, color, radius) {
+            if (!dir || (!dir.x && !dir.y))
+                dir = {
+                    x: (mn.rand() > 0.5 ? 1 : -1) * mn.rand(1, 10),
+                    y: (mn.rand() > 0.5 ? 1 : -1) * mn.rand(1, 10)
+                }
+            dir = { x: Math.min(dir.x, 10), y: Math.min(dir.y, 10) }
+            var circle = new Circle(
+                pos || utils.randPos(this.canvas.width, this.canvas.height),
+                dir,
+                color || utils.randColor(),
+                radius || utils.randRadius())
+            this.circles.push(circle)
+        },
+        render: function () {
+            var canvas = this.canvas
+            var ctx = canvas.getContext("2d")
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            mn.each(this.circles, function (circle) {
+                circle.render(canvas.width, canvas.height, ctx)
+            }, this)
+
+            if (mn.rand(0, 100) === 0) this.canvas.style.webkitAnimationName = 'blur'
         }
-        var self = this
-        setInterval(function () {
-            self.render()
-        }, 25)
-        return this
-    }
-
-    Frame.prototype.speedUp = function () {
-        this.speed++
-    }
-
-    Frame.prototype.addCircle = function () {
-        var circle = new Circle(utils.randPos(this.canvas.width, this.canvas.height),
-            utils.randDir(),
-            utils.randColor(),
-            utils.randRadius())
-        this.circles.push(circle)
-    }
-
-    Frame.prototype.render = function () {
-        var canvas = this.canvas
-        var context = canvas.getContext("2d")
-
-        context.clearRect(0, 0, canvas.width, canvas.height)
-        context.strokeStyle = '#000000'
-        context.strokeRect(0, 0, canvas.width, canvas.height)
-
-        mn.each(this.circles, function(circle) {
-            circle.move(this.speed, canvas.width, canvas.height)
-            circle.draw(context)
-        }, this)
     }
 
     var utils = {
-        degreesToRadians: function (degrees) {
-            return (degrees * Math.PI) / 180
-        },
-
         randDir: function () {
-            return new Point((Math.random() > 0.5 ? 1 : -1) * mn.rand(),
-                (mn.rand() > 0.5 ? 1 : -1) * mn.rand())
+            return {
+                x: (mn.rand() > 0.5 ? 1 : -1) * mn.rand(1, 10),
+                y: (mn.rand() > 0.5 ? 1 : -1) * mn.rand(1, 10)
+            }
         },
 
         randPos: function (w, h) {
-            return new Point(mn.rand(w), mn.rand(h))
+            return { x: mn.rand(w), y: mn.rand(h) }
         },
 
+        colors: [ '#CC5C54', '#F69162', '#FFFFCD', '#ff454f', '#85A562', '#7AB5DB' ],
         randColor: function () {
-            var letters = '0123456789ABCDEF'.split('')
-            var color = '#'
-            for (var i = 0; i < 6; i++) {
-                color += letters[mn.rand(15)]
-            }
-            return color
+            return this.colors[mn.rand(this.colors.length)]
         },
 
         randRadius: function () {
-            return mn.rand(5) + 5
+            return mn.rand(20) + 20
         }
     }
 
     window.addEventListener("load", function () {
-        var doc = window.document
-        var canvases = doc.getElementsByClassName("circles")
-        var frames = mn.map(Array.prototype.slice.call(canvases), function (canvas) {
-            return new Frame(canvas).start()
-        })
+        var doc, canvas, frame, div, startPos
 
-        doc.getElementById("btnAddSpeed").addEventListener("click", function () {
-            mn.each(frames, function (f) {
-                f.speedUp()
-            })
-        })
+        doc = window.document
 
-        doc.getElementById("btnAddBall").addEventListener("click", function () {
-            mn.each(frames, function (f) {
-                f.addCircle()
-            })
-        })
+        canvas = doc.createElement("canvas")
+        new Scene(canvas).start()
+
+        div = doc.createElement("div")
+        div.appendChild(canvas)
+        div.style.minWidth = div.style.minHeight = "100%"
+        doc.body.appendChild(div)
+
+        canvas.width = div.offsetWidth
+        canvas.height = div.offsetHeight
     })
 })(window)
