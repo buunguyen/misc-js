@@ -1,4 +1,4 @@
-;(function () {
+!function () {
     var previous = this.mn
 
     var mn = {}
@@ -156,4 +156,4 @@
             return obj && Object.prototype.toString.call(obj) === "[object " + name + "]"
         }
     })
-}).call(this)
+}.call(this)

@@ -1,4 +1,4 @@
-(function (window) {
+!function (window) {
     var Circle = function (pos, dir, color, radius) {
         this.pos = pos
         this.dir = dir
@@ -111,13 +111,6 @@
     }
 
     var utils = {
-        randDir: function () {
-            return {
-                x: (mn.rand() > 0.5 ? 1 : -1) * mn.rand(1, 10),
-                y: (mn.rand() > 0.5 ? 1 : -1) * mn.rand(1, 10)
-            }
-        },
-
         randPos: function (w, h) {
             return { x: mn.rand(w), y: mn.rand(h) }
         },
@@ -148,4 +141,4 @@
         canvas.width = div.offsetWidth
         canvas.height = div.offsetHeight
     })
-})(window)
+}(window)
