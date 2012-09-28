@@ -77,10 +77,13 @@
             for (var i = 0; i < this.numberOfCircles; i++) {
                 this.addCircle()
             }
-            var self = this
-            setInterval(function () {
+
+            var self = this;
+            (function loop(){
+                requestAnimationFrame(loop)
                 self.render()
-            }, 16)
+            })()
+
             return this
         },
         addCircle: function (pos, dir, color, radius) {
