@@ -1,12 +1,12 @@
-JavaScript Samples
+MiscJS
 ==========
 
-Collection of JavaScript samples I code when learning Node, Express, Backbone etc.
-More will be added as I continue playing with these.
+Miscellaneous JS stuff created when toying around with things...
 
 * _: despites the folder name, this is not underscore; this contains mn.js, a small happy library used by samples which don't (want to) depend on any framework
 * __circles__: a bunch of circles running on HTML5 canvases
+* __bouncing (new)__: circles with a touch of physics
 * __todos__: plain vanilla JS implementation of [TodoMVC](https://github.com/addyosmani/todomvc/)
 * __notes__: single page note app
     * _Server side_: Node, Express, MongoDB
-    * _Client side_: multiple implementations (Sammy, Backbone and soon Knockout)
+    * _Client side_: multiple implementations (Sammy and Backbone)
